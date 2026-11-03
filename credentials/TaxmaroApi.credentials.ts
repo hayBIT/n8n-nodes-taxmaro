@@ -56,12 +56,45 @@ export class TaxmaroApi implements ICredentialType {
 
 	async preAuthentication(this: IHttpRequestHelper, credentials: ICredentialDataDecryptedObject) {
 		const baseUrl = String(credentials.baseUrl).replace(/\/+$/, '');
-		const response = (await this.helpers.httpRequest({
-			method: 'POST',
-			url: `${baseUrl}/api/v1/users/sessions`,
-			body: { email: credentials.email, password: credentials.password },
-			json: true,
-		})) as { included?: JsonApiResource[] };
+		const hint =
+			`Check the Base URL "${baseUrl}": it must point to the Taxmaro API ` +
+			'(default https://app.taxmaro.com), not to the web interface of a white-label host.';
+
+		let response: { included?: JsonApiResource[] } | string;
+		try {
+			response = (await this.helpers.httpRequest({
+				method: 'POST',
+				url: `${baseUrl}/api/v1/users/sessions`,
+				body: { email: credentials.email, password: credentials.password },
+				json: true,
+			})) as { included?: JsonApiResource[] } | string;
+		} catch (error) {
+			const { httpCode, response: failed } = error as {
+				httpCode?: string | number;
+				response?: { status?: number; data?: unknown; body?: unknown };
+			};
+			const status = Number(httpCode ?? failed?.status);
+			if (status === 404 || status === 405) {
+				throw new Error(`Taxmaro login failed with HTTP ${status}. ${hint}`);
+			}
+			if (status === 400 || status === 401) {
+				const body = (failed?.data ?? failed?.body) as
+					| { errors?: Array<{ detail?: string }> }
+					| undefined;
+				const reason = (body?.errors?.[0]?.detail ?? 'the login was rejected').replace(/\.+$/, '');
+				throw new Error(
+					`Taxmaro login failed (HTTP ${status}): ${reason}. ` +
+						'Accounts with two-factor login or single sign-on cannot log in with email and ' +
+						'password: create an API token in the Taxmaro web interface and use ' +
+						'"Authentication: API Token" instead.',
+				);
+			}
+			throw error;
+		}
+
+		if (typeof response === 'string') {
+			throw new Error(`Taxmaro login returned a web page instead of JSON. ${hint}`);
+		}
 
 		const token = response.included?.find((item) => item.type === 'auth_token')?.attributes?.token;
 		if (!token) {

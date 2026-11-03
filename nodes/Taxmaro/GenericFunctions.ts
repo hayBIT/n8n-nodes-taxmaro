@@ -14,8 +14,15 @@ interface TaxmaroRequest {
 	binary?: boolean;
 }
 
+export function taxmaroCredentialType(this: IExecuteFunctions): 'taxmaroApi' | 'taxmaroTokenApi' {
+	return this.getNodeParameter('authentication', 0, 'emailPassword') === 'apiToken'
+		? 'taxmaroTokenApi'
+		: 'taxmaroApi';
+}
+
 export async function taxmaroRequest(this: IExecuteFunctions, request: TaxmaroRequest) {
-	const credentials = await this.getCredentials('taxmaroApi');
+	const credentialType = taxmaroCredentialType.call(this);
+	const credentials = await this.getCredentials(credentialType);
 	const baseUrl = String(credentials.baseUrl).replace(/\/+$/, '');
 
 	const headers: IDataObject = { Accept: request.binary ? '*/*' : 'application/json' };
@@ -31,7 +38,7 @@ export async function taxmaroRequest(this: IExecuteFunctions, request: TaxmaroRe
 	};
 	if (request.binary) options.encoding = 'arraybuffer';
 
-	return await this.helpers.httpRequestWithAuthentication.call(this, 'taxmaroApi', options);
+	return await this.helpers.httpRequestWithAuthentication.call(this, credentialType, options);
 }
 
 export function buildQuery(parameters: IDataObject): IDataObject {

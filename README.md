@@ -11,6 +11,21 @@ See the [n8n docs](https://docs.n8n.io/integrations/community-nodes/installation
 
 ## Credentials
 
+The node offers two ways to sign in (parameter **Authentication**). Both use the **API host** `https://app.taxmaro.com` as Base URL, also if your Taxmaro instance has its own web address (for example `https://payroll-….taxmaro.co`). Those addresses serve the web interface and reject API logins with HTTP 405.
+
+### API Token (recommended)
+
+Create a **Taxmaro API Token API** credential:
+
+| Field | Description |
+| --- | --- |
+| Base URL | `https://app.taxmaro.com` |
+| API Token | A token you create in the Taxmaro web interface under **API-Token → Token generieren** |
+
+The token is sent as `Authorization: Bearer …`. It works with accounts that use two-factor login or single sign-on, and it does not store your password in n8n.
+
+### Email & Password
+
 Create a **Taxmaro API** credential:
 
 | Field | Description |
@@ -18,7 +33,7 @@ Create a **Taxmaro API** credential:
 | Base URL | `https://app.taxmaro.com` (change it for other environments) |
 | Email / Password | Your Taxmaro login |
 
-The node logs in via `POST /api/v1/users/sessions` and sends the returned JWT as `Authorization: Bearer …`. The session token is refreshed automatically when it expires.
+The node logs in via `POST /api/v1/users/sessions` and sends the returned JWT as `Authorization: Bearer …`. The session token is refreshed automatically when it expires. Accounts with two-factor login or single sign-on cannot sign in this way; use an API token instead. Workflows created before the API token was added use this option.
 
 ## Usage
 
