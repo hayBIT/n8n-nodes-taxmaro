@@ -1,6 +1,6 @@
 {
 	"name": "n8n-nodes-taxmaro",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "n8n community node for the Taxmaro HR and payroll API",
 	"license": "MIT",
 	"homepage": "https://github.com/hayBIT/n8n-nodes-taxmaro",
@@ -29,7 +29,8 @@
 		"prepublishOnly": "n8n-node prerelease"
 	},
 	"files": [
-		"dist"
+		"dist",
+		"!dist/tsconfig.tsbuildinfo"
 	],
 	"n8n": {
 		"n8nNodesApiVersion": 1,
