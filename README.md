@@ -15,7 +15,7 @@ Create a **Taxmaro API** credential:
 
 | Field | Description |
 | --- | --- |
-| Base URL | `https://app.taxmaro.com` (change it for other environments) |
+| Base URL | `https://app.taxmaro.com` (change it for other environments). Use the **API host**, not the host of the web interface: white-label hosts such as `https://payroll-….taxmaro.co` serve the web UI and reject the login with HTTP 405. |
 | Email / Password | Your Taxmaro login |
 
 The node logs in via `POST /api/v1/users/sessions` and sends the returned JWT as `Authorization: Bearer …`. The session token is refreshed automatically when it expires.
