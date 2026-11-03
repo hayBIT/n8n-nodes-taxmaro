@@ -78,6 +78,26 @@ const bodyProperties: INodeProperties[] = operations
 
 export const properties: INodeProperties[] = [
 	{
+		displayName: 'Authentication',
+		name: 'authentication',
+		type: 'options',
+		noDataExpression: true,
+		options: [
+			{
+				name: 'API Token',
+				value: 'apiToken',
+				description: 'Use a token created in the Taxmaro web interface (recommended)',
+			},
+			{
+				name: 'Email & Password',
+				value: 'emailPassword',
+				description: 'Log in with the Taxmaro account. Does not work with two-factor login.',
+			},
+		],
+		// existing workflows were built with email and password
+		default: 'emailPassword',
+	},
+	{
 		displayName: 'Resource',
 		name: 'resource',
 		type: 'options',

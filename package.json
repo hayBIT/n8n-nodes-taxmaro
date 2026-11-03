@@ -35,7 +35,8 @@
 		"n8nNodesApiVersion": 1,
 		"strict": true,
 		"credentials": [
-			"dist/credentials/TaxmaroApi.credentials.js"
+			"dist/credentials/TaxmaroApi.credentials.js",
+			"dist/credentials/TaxmaroTokenApi.credentials.js"
 		],
 		"nodes": [
 			"dist/nodes/Taxmaro/Taxmaro.node.js"

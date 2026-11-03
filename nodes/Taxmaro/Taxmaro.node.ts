@@ -28,7 +28,18 @@ export class Taxmaro implements INodeType {
 		usableAsTool: true,
 		inputs: [NodeConnectionTypes.Main],
 		outputs: [NodeConnectionTypes.Main],
-		credentials: [{ name: 'taxmaroApi', required: true }],
+		credentials: [
+			{
+				name: 'taxmaroTokenApi',
+				required: true,
+				displayOptions: { show: { authentication: ['apiToken'] } },
+			},
+			{
+				name: 'taxmaroApi',
+				required: true,
+				displayOptions: { show: { authentication: ['emailPassword'] } },
+			},
+		],
 		properties,
 	};
 
@@ -106,7 +117,11 @@ export class Taxmaro implements INodeType {
 							qs: { ...buildQuery(queryParameters), page, per_page: perPage },
 						})) as IDataObject;
 						const data = response?.data;
-						const rows = Array.isArray(data) ? (data as IDataObject[]) : data ? [data as IDataObject] : [];
+						const rows = Array.isArray(data)
+							? (data as IDataObject[])
+							: data
+								? [data as IDataObject]
+								: [];
 						// Endpoints without pagination return the same list for every page.
 						const firstId = (rows[0] as IDataObject | undefined)?.id;
 						if (page > 1 && firstId !== undefined && firstId === previousFirstId) break;
@@ -141,8 +156,7 @@ export class Taxmaro implements INodeType {
 					});
 					continue;
 				}
-				const alreadyWrapped =
-					error instanceof NodeApiError || error instanceof NodeOperationError;
+				const alreadyWrapped = error instanceof NodeApiError || error instanceof NodeOperationError;
 				throw alreadyWrapped
 					? (error as NodeApiError)
 					: new NodeApiError(this.getNode(), error as JsonObject, { itemIndex: i });

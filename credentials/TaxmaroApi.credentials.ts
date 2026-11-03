@@ -71,11 +71,23 @@ export class TaxmaroApi implements ICredentialType {
 		} catch (error) {
 			const { httpCode, response: failed } = error as {
 				httpCode?: string | number;
-				response?: { status?: number };
+				response?: { status?: number; data?: unknown; body?: unknown };
 			};
 			const status = Number(httpCode ?? failed?.status);
 			if (status === 404 || status === 405) {
 				throw new Error(`Taxmaro login failed with HTTP ${status}. ${hint}`);
+			}
+			if (status === 400 || status === 401) {
+				const body = (failed?.data ?? failed?.body) as
+					| { errors?: Array<{ detail?: string }> }
+					| undefined;
+				const reason = (body?.errors?.[0]?.detail ?? 'the login was rejected').replace(/\.+$/, '');
+				throw new Error(
+					`Taxmaro login failed (HTTP ${status}): ${reason}. ` +
+						'Accounts with two-factor login or single sign-on cannot log in with email and ' +
+						'password: create an API token in the Taxmaro web interface and use ' +
+						'"Authentication: API Token" instead.',
+				);
 			}
 			throw error;
 		}
